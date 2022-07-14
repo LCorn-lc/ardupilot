@@ -197,6 +197,13 @@ void HAL_SITL::run(int argc, char * const argv[], Callbacks* callbacks) const
 {
     assert(callbacks);
 
+    // [LAC: list command line args]
+//        printf("HAL_SITL::run() argc=%d\n", argc);
+//        for (int i = 0; i < argc; i++) {
+//            printf("arg%i = [%s]\n", i, argv[i]);
+//        }
+    // [LAC: end list]
+
     utilInstance.init(argc, argv);
     _sitl_state->init(argc, argv);
 
