@@ -215,6 +215,7 @@ bool AP_Param::check_group_info(const struct AP_Param::GroupInfo *  group_info,
         uint8_t idx = group_info[i].idx;
         if (idx >= (1<<_group_level_shift)) {
             Debug("idx too large (%u) in %s", idx, group_info[i].name);
+            printf("idx too large (%u) in %s\n", idx, group_info[i].name);
             return false;
         }
         if (group_shift != 0 && idx == 0) {
@@ -223,6 +224,7 @@ bool AP_Param::check_group_info(const struct AP_Param::GroupInfo *  group_info,
         }
         if (used_mask & (1ULL<<idx)) {
             Debug("Duplicate group idx %u for %s", idx, group_info[i].name);
+            printf("Duplicate group idx %u for %s\n", idx, group_info[i].name);
             return false;
         }
         used_mask |= (1ULL<<idx);
@@ -230,6 +232,7 @@ bool AP_Param::check_group_info(const struct AP_Param::GroupInfo *  group_info,
             // a nested group
             if (group_shift + _group_level_shift >= _group_bits) {
                 Debug("double group nesting in %s", group_info[i].name);
+                printf("double group nesting in %s\n", group_info[i].name);
                 return false;
             }
             const struct GroupInfo *ginfo = get_group_info(group_info[i]);
@@ -237,6 +240,7 @@ bool AP_Param::check_group_info(const struct AP_Param::GroupInfo *  group_info,
                 continue;
             }
             if (!check_group_info(ginfo, total_size, group_shift + _group_level_shift, prefix_length + strlen(group_info[i].name))) {
+                printf("nested group fail in %s\n", group_info[i].name);
                 return false;
             }
             continue;
@@ -244,10 +248,12 @@ bool AP_Param::check_group_info(const struct AP_Param::GroupInfo *  group_info,
         uint8_t size = type_size((enum ap_var_type)type);
         if (size == 0) {
             Debug("invalid type in %s", group_info[i].name);
+            printf("invalid type in %s\n", group_info[i].name);
             return false;
         }
         if (prefix_length + strlen(group_info[i].name) > 16) {
             Debug("suffix is too long in %s", group_info[i].name);
+            printf("suffix is too long in %s\n", group_info[i].name);
             return false;
         }
         (*total_size) += size + sizeof(struct Param_header);
@@ -302,6 +308,7 @@ bool AP_Param::check_var_info(void)
         if (type == AP_PARAM_GROUP) {
             if (i == 0) {
                 // first element can't be a group, for first() call
+//                printf("AP_Param::check_var_info() first element is a group\n"); // [LAC:]
                 return false;
             }
             const struct GroupInfo *group_info = get_group_info(info);
@@ -309,6 +316,7 @@ bool AP_Param::check_var_info(void)
                 continue;
             }
             if (!check_group_info(group_info, &total_size, 0, strlen(info.name))) {
+//                printf("AP_Param::check_var_info() failed check group %s\n", info.name); // [LAC:]
                 return false;
             }
         } else {
@@ -316,6 +324,7 @@ bool AP_Param::check_var_info(void)
             if (size == 0) {
                 // not a valid type - the top level list can't contain
                 // AP_PARAM_NONE
+//                printf("AP_Param::check_var_info() size is zero\n"); // [LAC:]
                 return false;
             }
             total_size += size + sizeof(struct Param_header);
@@ -325,6 +334,7 @@ bool AP_Param::check_var_info(void)
         }
         if (type != AP_PARAM_GROUP && (info.flags & AP_PARAM_FLAG_POINTER)) {
             // only groups can be pointers
+//            printf("AP_Param::check_var_info() only groups can be pointers\n"); // [LAC:]
             return false;
         }
     }

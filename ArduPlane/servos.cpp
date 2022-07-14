@@ -958,9 +958,23 @@ void Plane::servos_output(void)
     // support twin-engine aircraft
     servos_twin_engine_mix();
 
+    // [LAC: add code to output yaw control on AP_MOTORS_CH_TRI_YAW ]
     // run vtail and elevon mixers
     channel_function_mixer(SRV_Channel::k_aileron, SRV_Channel::k_elevator, SRV_Channel::k_elevon_left, SRV_Channel::k_elevon_right);
-    channel_function_mixer(SRV_Channel::k_rudder,  SRV_Channel::k_elevator, SRV_Channel::k_vtail_right, SRV_Channel::k_vtail_left);
+//    channel_function_mixer(SRV_Channel::k_rudder,  SRV_Channel::k_elevator, SRV_Channel::k_vtail_right, SRV_Channel::k_vtail_left);
+    channel_function_mixer(SRV_Channel::k_rudder,  SRV_Channel::k_motor7, SRV_Channel::k_vtail_right, SRV_Channel::k_vtail_left);
+// [LAC: monitors]
+#ifdef LAC_PRINTF
+    {
+        static uint64_t count =0;
+        float cmd;
+        count++;
+        if (count%500 == 0) {
+            cmd = SRV_Channels::get_output_scaled(SRV_Channel::k_motor7);
+            printf("Plane::servos_output() k_7=%7.3f\n", cmd);
+        }
+    }
+#endif
 
 #if HAL_QUADPLANE_ENABLED
     // cope with tailsitters and bicopters

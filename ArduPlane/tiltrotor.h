@@ -79,6 +79,7 @@ public:
     AP_Float fixed_angle;
     AP_Float fixed_gain;
     AP_Float flap_angle_deg;
+    AP_Float lac_yaw_gain;      // [LAC: adding a YAW command gain to be used for the rudder control in QSTABELIZE, etc ]
 
     float current_tilt;
     float current_throttle;

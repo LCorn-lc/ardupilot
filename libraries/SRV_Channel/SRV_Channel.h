@@ -91,7 +91,7 @@ public:
         k_motor4                = 36,
         k_motor5                = 37,
         k_motor6                = 38,
-        k_motor7                = 39,
+        k_motor7                = 39,            ///< Also ... Tricopter AP_MOTORS_CH_TRI_YAW, [Leigh: aux rudder controls from tiltrotor]
         k_motor8                = 40,
         k_motor_tilt            = 41,            ///< tiltrotor motor tilt control
         k_generator_control     = 42,            ///< state control for generator

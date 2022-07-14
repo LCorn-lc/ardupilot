@@ -265,6 +265,13 @@ public:
     // write log, to be called at 10hz
     virtual void Log_Write() {};
 
+    // add a motor to the motor map    [LAC: make this public]
+    void add_motor_num(int8_t motor_num);
+
+//    // internal variables [LAC: moved from below]
+//    float               _yaw_in;                    // desired yaw control from attitude controller, -1 ~ +1
+//    float               _yaw_in_ff;                 // desired yaw feed forward control from attitude controller, -1 ~ +1
+
 protected:
     // output functions that should be overloaded by child classes
     virtual void        output_armed_stabilizing() = 0;
@@ -278,9 +285,9 @@ protected:
       motor number
     */
     uint32_t    motor_mask_to_srv_channel_mask(uint32_t mask) const;
-
-    // add a motor to the motor map
-    void add_motor_num(int8_t motor_num);
+//
+//    // add a motor to the motor map
+//    void add_motor_num(int8_t motor_num);
     
     // update the throttle input filter
     virtual void update_throttle_filter() = 0;

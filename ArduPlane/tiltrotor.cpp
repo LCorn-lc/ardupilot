@@ -81,6 +81,16 @@ const AP_Param::GroupInfo Tiltrotor::var_info[] = {
     // @User: Standard
     AP_GROUPINFO("WING_FLAP", 10, Tiltrotor, flap_angle_deg, 0),
 
+    // [LAC: adding a YAW command gain to be used for the rudder control in QSTABELIZE, etc ]
+    // @Param: L_YAW_GN
+    // @DisplayName: LAC YAW Command Gain
+    // @Description: Multiplier applied to computed YAW control in Q_ modes for output to rudder
+    // @Units: none
+    // @Range: -50000 +50000
+    // @Increment: 0.1
+    // @User: Advanced
+    AP_GROUPINFO("L_YAW_GN", 11, Tiltrotor, lac_yaw_gain, 500),     // full param name Q_TILT_L_YAW_GN
+
     AP_GROUPEND
 };
 
@@ -96,12 +106,26 @@ Tiltrotor::Tiltrotor(QuadPlane& _quadplane, AP_MotorsMulticopter*& _motors):quad
 
 void Tiltrotor::setup()
 {
+    // [LAC: experiment with output]
+#ifdef LAC_PRINTF
+        gcs().send_text(MAV_SEVERITY_INFO, "Tiltrotor::setup(), gcs-hello world! %5.3f", (double)3.142f);
+        printf("Tiltrotor::setup(), printf-hello world! %5.3f\n", (double)3.142f);
+        if (!SRV_Channels::get_channel_for(SRV_Channel::k_motor7, AP_MOTORS_CH_TRI_YAW)) {
+            gcs().send_text(MAV_SEVERITY_WARNING, "LAC: unable to setup yaw channel");
+            printf("channel AP_MOTORS_CH_TRI_YAW not assoc with k_motor7\n");
+        }
+        printf("Tiltrotor::setup() max_ang =%7.3f\n", 1.0*motors->_yaw_servo_angle_max_deg);
+#endif
+        // allow mapping of motor7
+        motors->add_motor_num(AP_MOTORS_CH_TRI_YAW);
+        SRV_Channels::set_angle(SRV_Channels::get_motor_function(AP_MOTORS_CH_TRI_YAW), motors->_yaw_servo_angle_max_deg*100);
+    // [LAC: end ]
 
     if (!enable.configured() && ((tilt_mask != 0) || (type == TILT_TYPE_BICOPTER))) {
         enable.set_and_save(1);
     }
 
-    if (enable <= 0) {
+    if (enable <= 0) {  // Should never be written to
         return;
     }
 
@@ -372,6 +396,22 @@ void Tiltrotor::update(void)
     if (type == TILT_TYPE_VECTORED_YAW) {
         vectoring();
     }
+
+    // [LAC: add code to output yaw control on k_motor7 ]
+    {
+        float yaw_cd;
+        yaw_cd = motors->get_yaw() +  motors->get_yaw_ff();
+        SRV_Channels::set_output_scaled(SRV_Channel::k_motor7, yaw_cd * lac_yaw_gain);
+        // output info to terminal
+#ifdef LAC_PRINTF
+        static int64_t count = 0;
+        count++;
+        if ((count % 500 == 0)) // && (yaw_cd != 99.0f))
+            //printf("Tiltrotor::update() yaw_cd=%7.3f, sf=%7.3f\n", yaw_cd, sinf(radians( motors->_yaw_servo_angle_max_deg)));
+            printf("Tiltrotor::update() yaw_cd=%7.3f, y=%7.3f, yff=%7.3f\n", motors->get_yaw(), motors->get_yaw_ff());
+#endif
+    }
+    // [LAC: end]
 }
 
 /*

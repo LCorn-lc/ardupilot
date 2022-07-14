@@ -1,5 +1,7 @@
 #pragma once
 
+//#define LAC_PRINTF  // [LAC: enables custom printf outputs ]
+
 // Internal defines, don't edit and expect things to work
 // -------------------------------------------------------
 

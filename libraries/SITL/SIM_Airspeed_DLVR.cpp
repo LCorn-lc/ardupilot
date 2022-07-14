@@ -48,7 +48,8 @@ int SITL::Airspeed_DLVR::rdwr(I2C::i2c_rdwr_ioctl_data *&data)
         return 0;
     }
 
-    AP_HAL::panic("Should never be written to");
+    //AP_HAL::panic("Airspeed_DLVR: Should never be written to");  // [LAC: remove panic]
+    return 1; // error?
 }
 
 
